@@ -1,0 +1,21 @@
+#!/bin/bash
+cd /var/www/smf21
+
+# Remove everything except for the settings.
+shopt -s extglob
+rm -Rf !(Settings.php|Settings_bak.php)
+
+# Get a fresh copy and throw it in a temporary folder.
+git clone https://github.com/SimpleMachines/SMF2.1.git -b release-2.1 ./temp
+
+# Move all files.
+mv ./temp/* .
+
+# Copy over the upgrade files and run the upgrader.
+cp ./other/upgrade* .
+php upgrade.php
+
+# Clean up.
+rm -f ./upgrade*
+rm -Rf ./other
+rm -Rf ./temp
