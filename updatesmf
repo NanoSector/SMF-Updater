@@ -1,5 +1,6 @@
 #!/bin/bash
-cd /var/www/smf21
+SMFDIR=/var/www/smf21
+cd $SMFDIR
 
 # Remove everything except for the settings.
 shopt -s extglob
@@ -13,6 +14,10 @@ mv ./temp/* .
 
 # Copy over the upgrade files and run the upgrader.
 cp ./other/upgrade* .
+# Uncomment the following lines if you want permissions to automatically be corrected.
+# This requires ROOT ACCESS.
+#chown -R www-data:www-data $SMFDIR
+#chmod -R 0755 $SMFDIR
 php upgrade.php
 
 # Clean up.
