@@ -1,26 +1,31 @@
 #!/bin/bash
-SMFDIR=/var/www/smf21
-cd $SMFDIR
-
-# Remove everything except for the settings.
 shopt -s extglob
-rm -Rf !(Settings.php|Settings_bak.php)
+do_update () {
+    cd $1
+    
+    # Remove everything except for the settings.
+    rm -Rf !(Settings.php|Settings_bak.php|attachments|custom_avatar|cache|*.komodoproject)
+    
+    # Get a fresh copy and throw it in a temporary folder.
+    git clone https://github.com/SimpleMachines/SMF2.1.git -b release-2.1 ./temp
+    
+    # Move all files.
+    mv -uf ./temp/* .
+    
+    # Copy over the upgrade files and run the upgrader.
+    cp ./other/upgrade* .
+    # Uncomment the following lines if you want permissions to automatically be corrected.
+    # This requires ROOT ACCESS.
+    #chown -R www-data:www-data $SMFDIR
+    #chmod -R 0755 $SMFDIR
+    php upgrade.php > $1/latestupgrade.txt
+    
+    # Clean up.
+    rm -f ./upgrade*
+    rm -Rf ./other
+    rm -Rf ./temp
+}
 
-# Get a fresh copy and throw it in a temporary folder.
-git clone https://github.com/SimpleMachines/SMF2.1.git -b release-2.1 ./temp
+# Change this line to where your SMF installation is in which you want to update.
+do_update /mnt/data/Web/smf21
 
-# Move all files.
-mv ./temp/* .
-
-# Copy over the upgrade files and run the upgrader.
-cp ./other/upgrade* .
-# Uncomment the following lines if you want permissions to automatically be corrected.
-# This requires ROOT ACCESS.
-#chown -R www-data:www-data $SMFDIR
-#chmod -R 0755 $SMFDIR
-php upgrade.php
-
-# Clean up.
-rm -f ./upgrade*
-rm -Rf ./other
-rm -Rf ./temp
